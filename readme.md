@@ -12,5 +12,5 @@
 * 輸入完畢後點擊START
 * 按Q可結束點擊
 
-![example](explain.gif)
+![example](example.gif)
 
