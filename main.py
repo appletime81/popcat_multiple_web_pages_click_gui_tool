@@ -1,54 +1,67 @@
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget, QScrollArea, QHBoxLayout
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QTableWidgetItem
 import sys
+import win32api
+import win32con
+from ctypes import *
+import time
+import keyboard
+
+
+def clickLeftCur():
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN|win32con.MOUSEEVENTF_LEFTUP, 0, 0)
 
 
 class App:
-    count_text_edit_showup_times = 1
+    count = 0
     def __init__(self):
         self.ui = QUiLoader().load("main.ui")
-
-        self.QScrollArea = QScrollArea(parent=self.ui)
-        self.QScrollArea.setGeometry(350, 100, 300, 200)
-        self.widget = QWidget()
-        # self.widget.setGeometry(350, 70, 300, 500)
-        self.layout = QVBoxLayout(self.widget)
-        self.layout.setAlignment(Qt.AlignTop)
-        self.ui.pushButton.clicked.connect(self.create_new_input_box)
+        self.ui.setWindowTitle("Taiwan No.1")
+        self.ui.add_coord_btn.clicked.connect(self.create_coord)
+        self.ui.start_btn.clicked.connect(self.start_click)
         self.ui.show()
 
+    def create_coord(self):
+        self.count += 1
+        self.ui.table.setRowCount(self.count)
+        self.ui.table.setColumnCount(2)
+        for i in range(self.count):
+            for j in range(2):
+                try:
+                    self.ui.table.setItem(i, j, QTableWidgetItem(str(self.ui.table.item(i, j).text())))
+                except:
+                    pass
+        self.ui.table.setHorizontalHeaderLabels(["X", "Y"])
 
-    def create_new_input_box(self):
-        self.count_text_edit_showup_times += 2
-        textEdit_x = QTextEdit()
-        textEdit_x.setObjectName(f"{self.count_text_edit_showup_times}")
-        textEdit_x.setMaximumSize(80, 30)
-        textEdit_y = QTextEdit()
-        textEdit_y.setMaximumSize(80, 30)
-        temp_widget = QWidget()
-        temp_layout = QHBoxLayout(temp_widget)
-        temp_layout.addWidget(textEdit_x)
-        temp_layout.addWidget(textEdit_y)
-        temp_layout.setAlignment(Qt.AlignTop)
-
-        # print("12:",textEdit_x.toPlainText())
-
-
-        self.layout.addWidget(temp_widget)
-        self.layout.setSpacing(2)
-        self.QScrollArea.setWidget(self.widget)
-        self.QScrollArea.setWidgetResizable(True)
-
-
-    # def
-
-
-
-
+    def start_click(self):
+        x = []
+        y = []
+        for i in range(self.count):
+            for j in range(2):
+                if j == 0:
+                    try:
+                        x.append(int(self.ui.table.item(i, j).text()))
+                    except:
+                        pass
+                else:
+                    try:
+                        y.append(int(self.ui.table.item(i, j).text()))
+                    except:
+                        pass
+        while True:
+            if keyboard.is_pressed("q"):
+                break
+            else:
+                for x_coord, y_coord in zip(x, y):
+                    windll.user32.SetCursorPos(x_coord, y_coord)
+                    clickLeftCur()
+                    time.sleep(0.001)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     MainWindow = App()
     sys.exit(app.exec())
+
+# pyinstaller -F -w --icon "popcat_background.ico" "main.py" -n "TaiwanWillWin"
+
